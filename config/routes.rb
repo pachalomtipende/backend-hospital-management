@@ -11,6 +11,12 @@ Rails.application.routes.draw do
   namespace :api do
     namespace :v1 do
       post "prioritize", to: "prioritizations#analyze"
+      resources :appointments, only: [:create] do
+        collection do
+          get :queue
+          post :auto_schedule
+        end
+      end
     end
   end
 end
