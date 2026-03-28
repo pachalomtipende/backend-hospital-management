@@ -43,6 +43,7 @@
     <orderEntry type="library" scope="PROVIDED" name="addressable (v2.8.9, ruby-3.4.9-p82) [gem]" level="application" />
     <orderEntry type="library" scope="PROVIDED" name="ast (v2.4.3, ruby-3.4.9-p82) [gem]" level="application" />
     <orderEntry type="library" scope="PROVIDED" name="base64 (v0.3.0, ruby-3.4.9-p82) [gem]" level="application" />
+    <orderEntry type="library" scope="TEST" name="bcrypt (v3.1.22, ruby-3.4.9-p82) [gem]" level="application" />
     <orderEntry type="library" scope="PROVIDED" name="bcrypt_pbkdf (v1.1.2, ruby-3.4.9-p82) [gem]" level="application" />
     <orderEntry type="library" scope="PROVIDED" name="bigdecimal (v4.0.1, ruby-3.4.9-p82) [gem]" level="application" />
     <orderEntry type="library" scope="PROVIDED" name="bootsnap (v1.23.0, ruby-3.4.9-p82) [gem]" level="application" />
