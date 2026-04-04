@@ -22,8 +22,12 @@ class AiPrioritizationService
 
   PRIORITY_LEVELS = { high: "HIGH", medium: "MEDIUM", low: "LOW" }.freeze
 
-  def initialize(symptoms)
-    @symptoms = Array(symptoms).reject(&:blank?).map { |s| s.to_s.downcase.strip }
+  def initialize(input_symptoms, severity: 'low')
+    @raw_input = input_symptoms
+    @severity = severity.to_s.downcase
+    @symptoms = []
+    
+    parse_input
   end
 
   def call
@@ -36,6 +40,7 @@ class AiPrioritizationService
     has_high = false
     has_medium = false
 
+    # Evaluate extracted symptoms
     @symptoms.each do |symptom|
       if matches_category?(symptom, :high)
         has_high = true
@@ -44,7 +49,6 @@ class AiPrioritizationService
         has_medium = true
         additional_symptoms_count += 1
       elsif matches_category?(symptom, :low) || symptom.present?
-        # Even unknown symptoms count towards the overall issue weight
         additional_symptoms_count += 1
       end
     end
@@ -60,9 +64,16 @@ class AiPrioritizationService
       base_score = 20
     end
 
-    # Calculate final score: Base score + 5 per additional symptom
+    # Calculate severity bump
+    severity_bump = case @severity
+                    when 'severe' then 10
+                    when 'moderate' then 5
+                    else 0
+                    end
+
+    # Calculate final score: Base score + 5 per additional symptom + severity bump
     score_bump = [additional_symptoms_count - 1, 0].max * 5
-    final_score = base_score + score_bump
+    final_score = base_score + score_bump + severity_bump
 
     # Cap scores within their tiers
     # HIGH: 80-100, MEDIUM: 50-79, LOW: 10-49
@@ -70,25 +81,47 @@ class AiPrioritizationService
 
     {
       priority_level: PRIORITY_LEVELS[highest_tier],
-      priority_score: final_score
+      priority_score: final_score,
+      detected_symptoms: @symptoms.uniq,
+      severity_input: @severity
     }
   end
 
   private
 
-  def matches_category?(symptom, category)
-    SYMPTOM_DICTS[category].any? do |keyword|
-      # Match keyword with word boundaries
-      match_data = symptom.match(/\b#{Regexp.escape(keyword)}\b/i)
+  def parse_input
+    if @raw_input.is_a?(Array)
+      @symptoms = @raw_input.reject(&:blank?).map { |s| s.to_s.downcase.strip }
+    else
+      # NLP Parsing: Scan the full text for known keywords from our dictionaries
+      text = @raw_input.to_s.downcase
       
-      if match_data
-        # If matched, check if there's a negation before it
-        prefix = symptom[0...match_data.begin(0)]
-        !prefix.match?(/\b(no|not|without|zero|negative)\s+([a-z-]+\s+)*$/i)
-      else
-        false
+      SYMPTOM_DICTS.each do |category, keywords|
+        keywords.each do |keyword|
+          if matches_keyword_in_text?(text, keyword)
+            @symptoms << keyword
+          end
+        end
       end
+      
+      # If no specific dictionary keywords are found, treat the whole string as one unknown symptom
+      @symptoms << text if @symptoms.empty? && text.present?
     end
+  end
+
+  def matches_keyword_in_text?(text, keyword)
+    match_data = text.match(/\b#{Regexp.escape(keyword)}\b/i)
+    if match_data
+      # Check for negation words immediately before the match
+      prefix = text[0...match_data.begin(0)]
+      !prefix.match?(/\b(no|not|without|zero|negative|none)\s+([a-z-]+\s+)*$/i)
+    else
+      false
+    end
+  end
+
+  def matches_category?(symptom, category)
+    SYMPTOM_DICTS[category].include?(symptom)
   end
 
   def limit_score(score, tier)

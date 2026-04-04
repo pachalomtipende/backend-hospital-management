@@ -18,18 +18,19 @@ module Api
         end
 
         patient_id = params[:patient_id] || patient.id
-        
         symptoms = params[:symptoms]
+        severity = params[:severity] || 'low'
         
-        if symptoms.blank? || !symptoms.is_a?(Array)
-          return render json: { error: "Please provide an array of symptoms" }, status: :bad_request
+        if symptoms.blank? || !(symptoms.is_a?(Array) || symptoms.is_a?(String))
+          return render json: { error: "Please provide symptoms as an array or a description string" }, status: :bad_request
         end
         
-        ai_result = AiPrioritizationService.new(symptoms).call
+        # The AI Service now handles both keyword arrays and full sentences
+        ai_result = AiPrioritizationService.new(symptoms, severity: severity).call
         
         appointment = Appointment.new(
           patient_id: patient_id,
-          symptoms: symptoms,
+          symptoms: ai_result[:detected_symptoms],
           priority_level: ai_result[:priority_level],
           priority_score: ai_result[:priority_score],
           status: 'pending'

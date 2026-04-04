@@ -52,9 +52,51 @@ class AiPrioritizationServiceTest < ActiveSupport::TestCase
 
   test "matches exact words with word boundaries" do
     # 'headache' should not match 'ache' if 'ache' was in high priority
-    # Here, 'chest pain' shouldn't be matched by 'chest pains' (unless plural matching is added)
-    # But let's test if 'pain' matches 'severe pain' 
     result = AiPrioritizationService.new(["chest paint"]).call # Should be unknown
     assert_equal "LOW", result[:priority_level]
+  end
+
+  test "extracts multiple symptoms from a full sentence" do
+    sentence = "I have severe chest pain and a little bit of fever."
+    result = AiPrioritizationService.new(sentence).call
+    assert_equal "HIGH", result[:priority_level]
+    # Should find 'chest pain' (high) and 'fever' (medium)
+    assert_includes result[:detected_symptoms], "chest pain"
+    assert_includes result[:detected_symptoms], "fever"
+    # base 80 + 5 (1 extra symptom) = 85
+    assert_equal 85, result[:priority_score]
+  end
+
+  test "applies severe severity bump within LOW tier" do
+    # 'cough' is low (base 20). Severe bump (+10) => 30.
+    result = AiPrioritizationService.new("I have a bad cough", severity: "severe").call
+    assert_equal "LOW", result[:priority_level]
+    assert_equal 30, result[:priority_score]
+  end
+
+  test "applies moderate severity bump to MEDIUM tier" do
+    # 'fever' is medium (base 50). Moderate bump (+5) => 55.
+    result = AiPrioritizationService.new(["fever"], severity: "moderate").call
+    assert_equal "MEDIUM", result[:priority_level]
+    assert_equal 55, result[:priority_score]
+  end
+
+  test "does not allow severity bump to cross LOW to MEDIUM boundary" do
+    # Let's say we have many low symptoms.
+    # Base 20 + 5 extra symptoms * 5 = 45.
+    # Severe bump (+10) => 55.
+    # BUT, since all are LOW, it must be capped at 49.
+    symptoms = ["cough", "headache", "runny nose", "sore throat", "mild rash", "fatigue"]
+    result = AiPrioritizationService.new(symptoms, severity: "severe").call
+    assert_equal "LOW", result[:priority_level]
+    assert_equal 49, result[:priority_score]
+  end
+
+  test "handles negation in full sentences" do
+    sentence = "I have a cough but I do not have chest pain."
+    result = AiPrioritizationService.new(sentence).call
+    assert_equal "LOW", result[:priority_level]
+    assert_includes result[:detected_symptoms], "cough"
+    refute_includes result[:detected_symptoms], "chest pain"
   end
 end
