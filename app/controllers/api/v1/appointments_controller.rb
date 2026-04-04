@@ -5,12 +5,19 @@ module Api
 
       # POST /api/v1/appointments
       def create
-        # For demonstration purposes: find or create a default guest patient
-        patient_id = params[:patient_id] || Patient.first_or_create(
-          name: "Guest Patient",
-          email: "guest@example.com",
-          phone: "000-000-0000"
-        ).id
+        # For demonstration purposes: Ensure a guest user exists
+        guest_user = User.find_or_create_by!(email: "guest@example.com") do |u|
+          u.password = "password"
+          u.role = :patient
+        end
+
+        # Ensure a guest patient exists for that user
+        patient = Patient.find_or_create_by!(user_id: guest_user.id) do |p|
+          p.name = "Guest Patient"
+          p.phone = "000-000-0000"
+        end
+
+        patient_id = params[:patient_id] || patient.id
         
         symptoms = params[:symptoms]
         

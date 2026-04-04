@@ -77,8 +77,18 @@ class AiPrioritizationService
   private
 
   def matches_category?(symptom, category)
-    # Doing partial matching allows detection of strings like "severe chest pain" matching "chest pain"
-    SYMPTOM_DICTS[category].any? { |keyword| symptom.include?(keyword) }
+    SYMPTOM_DICTS[category].any? do |keyword|
+      # Match keyword with word boundaries
+      match_data = symptom.match(/\b#{Regexp.escape(keyword)}\b/i)
+      
+      if match_data
+        # If matched, check if there's a negation before it
+        prefix = symptom[0...match_data.begin(0)]
+        !prefix.match?(/\b(no|not|without|zero|negative)\s+([a-z-]+\s+)*$/i)
+      else
+        false
+      end
+    end
   end
 
   def limit_score(score, tier)

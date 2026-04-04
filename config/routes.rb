@@ -10,6 +10,8 @@ Rails.application.routes.draw do
 
   namespace :api do
     namespace :v1 do
+      post "auth/login", to: "auth#login"
+      resources :users, only: [:index, :create]
       post "prioritize", to: "prioritizations#analyze"
       resources :appointments, only: [:create] do
         collection do

@@ -43,4 +43,18 @@ class AiPrioritizationServiceTest < ActiveSupport::TestCase
     assert_equal "LOW", result[:priority_level]
     assert_equal 25, result[:priority_score]
   end
+
+  test "ignores negated symptoms like 'no chest pain'" do
+    result = AiPrioritizationService.new(["no chest pain", "not fever"]).call
+    assert_equal "LOW", result[:priority_level]
+    assert_equal 25, result[:priority_score] # 2 symptoms
+  end
+
+  test "matches exact words with word boundaries" do
+    # 'headache' should not match 'ache' if 'ache' was in high priority
+    # Here, 'chest pain' shouldn't be matched by 'chest pains' (unless plural matching is added)
+    # But let's test if 'pain' matches 'severe pain' 
+    result = AiPrioritizationService.new(["chest paint"]).call # Should be unknown
+    assert_equal "LOW", result[:priority_level]
+  end
 end
