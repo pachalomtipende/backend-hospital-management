@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_04_05_152305) do
+ActiveRecord::Schema[8.1].define(version: 2026_04_06_113930) do
   create_table "active_storage_attachments", force: :cascade do |t|
     t.bigint "blob_id", null: false
     t.datetime "created_at", null: false
@@ -60,6 +60,19 @@ ActiveRecord::Schema[8.1].define(version: 2026_04_05_152305) do
     t.string "last_name"
     t.string "password_digest"
     t.string "phone"
+    t.datetime "updated_at", null: false
+  end
+
+  create_table "verified_doctors", force: :cascade do |t|
+    t.string "clinic"
+    t.datetime "created_at", null: false
+    t.string "email"
+    t.string "full_name"
+    t.string "medical_license_number"
+    t.string "password_digest"
+    t.string "phone_number"
+    t.string "professional_title"
+    t.text "specialties"
     t.datetime "updated_at", null: false
   end
 

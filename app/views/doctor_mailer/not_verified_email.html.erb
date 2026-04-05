@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>CareConnect - Credentials Not Verified</title>
+  <style>
+      body {
+          font-family: Arial, sans-serif;
+          background-color: #fef2f2; /* light red background */
+          color: #1F2937;
+          padding: 20px;
+      }
+      .container {
+          background-color: white;
+          padding: 30px;
+          border-radius: 10px;
+          max-width: 600px;
+          margin: auto;
+          box-shadow: 0px 4px 8px rgba(0,0,0,0.1);
+          border-left: 5px solid #ef4444; /* red accent */
+      }
+      h2 {
+          color: #ef4444; /* red title */
+      }
+      p {
+          font-size: 16px;
+          line-height: 1.5;
+      }
+      .footer {
+          margin-top: 20px;
+          font-size: 12px;
+          color: #888;
+      }
+  </style>
+</head>
+<body>
+<div class="container">
+  <h2>Attention, <%= @doctor.full_name %>!</h2>
+  <p>We reviewed your submitted credentials and <strong>they could not be verified</strong>. This means your account is not yet approved to log in.</p>
+  <p>Please ensure that your full name and email are correct, and that you have uploaded a valid document for verification. Once updated, you can request verification again.</p>
+  <p>If you believe this is an error, please contact our support team for assistance.</p>
+  <div class="footer">
+    &copy; <%= Time.current.year %> CareConnect. All rights reserved.
+  </div>
+</div>
+</body>
+</html>

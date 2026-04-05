@@ -81,6 +81,7 @@ Rails.application.configure do
     authentication: "plain",
     enable_starttls_auto: true
   }
+  config.action_controller.default_url_options = { host: 'localhost', port: 3000 }
 
 
 end

@@ -3,5 +3,9 @@ Rails.application.routes.draw do
   post "/api/verify", to: "patients#verify_email"
   post "/api/login", to: "patients#log_in"
   post "/api/doctor", to: "doctors#create"
+  get "doctors", to: "doctors#index"
+  post "doctors/:id/verify", to: "doctors#verify"
+  post "doctors/:id/reject", to: "doctors#reject"
+
 
 end
