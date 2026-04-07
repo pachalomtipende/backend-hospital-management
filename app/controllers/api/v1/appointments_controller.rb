@@ -38,7 +38,10 @@ module Api
         )
 
         if appointment.save
-          render json: appointment, status: :created
+          render json: {
+            appointment: appointment,
+            first_aid_advice: ai_result[:first_aid_advice]
+          }, status: :created
         else
           render json: { error: appointment.errors.full_messages.join(', ') }, status: :unprocessable_entity
         end
