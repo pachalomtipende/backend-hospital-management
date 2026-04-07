@@ -1,4 +1,17 @@
 class DoctorsController < ApplicationController
+  def doctor_login
+    email = params.require(:doctor)[:email]
+    password = params.require(:doctor)[:password]
+    clinic = params.require(:doctor)[:clinic]
+
+    doctor = VerifiedDoctor.find_by(email: email)
+
+    if doctor && doctor.authenticate(password) && doctor.clinic == clinic
+      render json: { message: "Login successful" }
+    else
+      render json: { errors: "login unsuccessful" }, status: :unprocessable_entity
+    end
+  end
 
   def index
     doctors = Doctor.all
@@ -11,6 +24,7 @@ class DoctorsController < ApplicationController
       }
     }
   end
+
 
 
   def verify
@@ -56,6 +70,7 @@ class DoctorsController < ApplicationController
     doctor.destroy
     render json: { message: "Doctor application rejected" }
   end
+
   def create
     doctor = Doctor.new(doctor_params)
 
@@ -65,6 +80,7 @@ class DoctorsController < ApplicationController
       render json: { errors: doctor.errors.full_messages }, status: :unprocessable_entity
     end
   end
+
   private
 
   def doctor_params
@@ -83,10 +99,12 @@ class DoctorsController < ApplicationController
   end
 
 
+
   private
 
 
   def valid_credentials?(doctor)
     doctor.full_name.present? && doctor.email.present? && doctor.document.attached?
   end
+
 end
