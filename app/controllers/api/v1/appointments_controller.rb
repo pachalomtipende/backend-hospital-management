@@ -25,7 +25,7 @@ module Api
           return render json: { error: "Please provide symptoms as an array or a description string" }, status: :bad_request
         end
         
-        # The AI Service now handles both keyword arrays and full sentences
+        # The AI Service processes keyword arrays and full sentences
         ai_result = AiPrioritizationService.new(symptoms, severity: severity).call
         
         appointment = Appointment.new(
@@ -33,13 +33,14 @@ module Api
           symptoms: ai_result[:detected_symptoms],
           priority_level: ai_result[:priority_level],
           priority_score: ai_result[:priority_score],
+          severity: ai_result[:severity_input],
           status: 'pending'
         )
 
         if appointment.save
           render json: appointment, status: :created
         else
-          render json: { errors: appointment.errors.full_messages }, status: :unprocessable_entity
+          render json: { error: appointment.errors.full_messages.join(', ') }, status: :unprocessable_entity
         end
       end
 
@@ -60,6 +61,19 @@ module Api
           message: "Successfully scheduled #{scheduled.count} appointments",
           appointments: scheduled
         }, status: :ok
+      end
+
+      # DELETE /api/v1/appointments/:id
+      def destroy
+        appointment = Appointment.find(params[:id])
+        appointment.destroy
+        head :no_content
+      end
+
+      # DELETE /api/v1/appointments/clear_all
+      def clear_all
+        Appointment.where(status: 'pending').destroy_all
+        head :no_content
       end
     end
   end

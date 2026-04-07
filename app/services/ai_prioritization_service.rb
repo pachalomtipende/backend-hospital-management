@@ -90,22 +90,21 @@ class AiPrioritizationService
   private
 
   def parse_input
-    if @raw_input.is_a?(Array)
-      @symptoms = @raw_input.reject(&:blank?).map { |s| s.to_s.downcase.strip }
-    else
-      # NLP Parsing: Scan the full text for known keywords from our dictionaries
-      text = @raw_input.to_s.downcase
-      
-      SYMPTOM_DICTS.each do |category, keywords|
-        keywords.each do |keyword|
-          if matches_keyword_in_text?(text, keyword)
-            @symptoms << keyword
-          end
+    # Normalize input to a single string for scanning
+    text = Array(@raw_input).join(" ").downcase
+    
+    # NLP Parsing: Scan the full text for known keywords from our dictionaries
+    SYMPTOM_DICTS.each do |category, keywords|
+      keywords.each do |keyword|
+        if matches_keyword_in_text?(text, keyword)
+          @symptoms << keyword
         end
       end
-      
-      # If no specific dictionary keywords are found, treat the whole string as one unknown symptom
-      @symptoms << text if @symptoms.empty? && text.present?
+    end
+    
+    # If no specific dictionary keywords are found, treat the whole string as one unknown symptom
+    if @symptoms.empty? && text.present?
+      @symptoms = Array(@raw_input).reject(&:blank?).map { |s| s.to_s.downcase.strip }
     end
   end
 

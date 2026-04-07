@@ -13,10 +13,11 @@ Rails.application.routes.draw do
       post "auth/login", to: "auth#login"
       resources :users, only: [:index, :create]
       post "prioritize", to: "prioritizations#analyze"
-      resources :appointments, only: [:create] do
+      resources :appointments, only: [:create, :destroy] do
         collection do
           get :queue
           post :auto_schedule
+          delete :clear_all
         end
       end
     end
