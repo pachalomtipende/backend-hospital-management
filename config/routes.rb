@@ -19,6 +19,20 @@ Rails.application.routes.draw do
           post :auto_schedule
           delete :clear_all
         end
+        member do
+          patch :confirm
+          patch :override
+          patch :cancel
+        end
+        resources :consultations, only: [:create]
+      end
+
+      resources :schedules, only: [] do
+        collection do
+          get :show
+          post :generate
+          post :incremental
+        end
       end
     end
   end

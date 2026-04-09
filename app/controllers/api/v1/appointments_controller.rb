@@ -78,6 +78,47 @@ module Api
         Appointment.where(status: 'pending').destroy_all
         head :no_content
       end
+
+      # PATCH /api/v1/appointments/:id/confirm
+      def confirm
+        appointment = Appointment.find(params[:id])
+        if appointment.update(status: 'confirmed', confirmed_by: @current_user&.email || 'Receptionist')
+          render json: appointment, status: :ok
+        else
+          render json: { error: appointment.errors.full_messages }, status: :unprocessable_entity
+        end
+      end
+
+      # PATCH /api/v1/appointments/:id/override
+      def override
+        appointment = Appointment.find(params[:id])
+        scheduled_at = Time.parse(params[:scheduled_at]) rescue nil
+        
+        if scheduled_at.nil?
+          return render json: { error: "Invalid or missing scheduled_at" }, status: :bad_request
+        end
+
+        if appointment.update(
+             status: 'overridden', 
+             scheduled_at: scheduled_at,
+             override_reason: params[:override_reason],
+             overridden_at: Time.current
+           )
+          render json: appointment, status: :ok
+        else
+          render json: { error: appointment.errors.full_messages }, status: :unprocessable_entity
+        end
+      end
+
+      # PATCH /api/v1/appointments/:id/cancel
+      def cancel
+        appointment = Appointment.find(params[:id])
+        if appointment.update(status: 'cancelled')
+          render json: appointment, status: :ok
+        else
+          render json: { error: appointment.errors.full_messages }, status: :unprocessable_entity
+        end
+      end
     end
   end
 end
