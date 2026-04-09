@@ -2,9 +2,11 @@ require "test_helper"
 
 class AutoSchedulingServiceTest < ActiveSupport::TestCase
   setup do
-    Patient.destroy_all
     Appointment.destroy_all
-    @patient = Patient.create!(name: "Test", email: "test@example.com", phone: "123")
+    Patient.destroy_all
+    User.destroy_all
+    @user = User.create!(email: "test@example.com", password: "password", role: :patient)
+    @patient = Patient.create!(user: @user, name: "Test", phone: "123")
   end
 
   test "schedules pending appointments in order of priority" do

@@ -10,9 +10,12 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_04_04_161854) do
+ActiveRecord::Schema[8.1].define(version: 2026_04_08_200001) do
   create_table "appointments", force: :cascade do |t|
+    t.string "confirmed_by"
     t.datetime "created_at", null: false
+    t.datetime "overridden_at"
+    t.text "override_reason"
     t.integer "patient_id", null: false
     t.string "priority_level"
     t.integer "priority_score"
@@ -22,6 +25,18 @@ ActiveRecord::Schema[8.1].define(version: 2026_04_04_161854) do
     t.text "symptoms"
     t.datetime "updated_at", null: false
     t.index ["patient_id"], name: "index_appointments_on_patient_id"
+  end
+
+  create_table "consultations", force: :cascade do |t|
+    t.integer "appointment_id", null: false
+    t.datetime "consulted_at"
+    t.datetime "created_at", null: false
+    t.text "diagnosis", null: false
+    t.string "doctor_name", null: false
+    t.text "notes"
+    t.text "treatment"
+    t.datetime "updated_at", null: false
+    t.index ["appointment_id"], name: "index_consultations_on_appointment_id"
   end
 
   create_table "patients", force: :cascade do |t|
@@ -43,5 +58,6 @@ ActiveRecord::Schema[8.1].define(version: 2026_04_04_161854) do
   end
 
   add_foreign_key "appointments", "patients"
+  add_foreign_key "consultations", "appointments"
   add_foreign_key "patients", "users"
 end
