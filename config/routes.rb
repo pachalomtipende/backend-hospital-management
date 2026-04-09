@@ -7,4 +7,33 @@ Rails.application.routes.draw do
 
   # Defines the root path route ("/")
   # root "posts#index"
+
+  namespace :api do
+    namespace :v1 do
+      post "auth/login", to: "auth#login"
+      resources :users, only: [:index, :create]
+      post "prioritize", to: "prioritizations#analyze"
+      resources :appointments, only: [:create, :destroy] do
+        collection do
+          get :queue
+          post :auto_schedule
+          delete :clear_all
+        end
+        member do
+          patch :confirm
+          patch :override
+          patch :cancel
+        end
+        resources :consultations, only: [:create]
+      end
+
+      resources :schedules, only: [] do
+        collection do
+          get :show
+          post :generate
+          post :incremental
+        end
+      end
+    end
+  end
 end

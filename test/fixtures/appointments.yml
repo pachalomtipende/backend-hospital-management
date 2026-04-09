@@ -1,0 +1,17 @@
+# Read about fixtures at https://api.rubyonrails.org/classes/ActiveRecord/FixtureSet.html
+
+one:
+  patient: one
+  symptoms: MyText
+  priority_level: MyString
+  priority_score: 1
+  status: MyString
+  scheduled_at: 2026-03-27 21:54:37
+
+two:
+  patient: two
+  symptoms: MyText
+  priority_level: MyString
+  priority_score: 1
+  status: MyString
+  scheduled_at: 2026-03-27 21:54:37
